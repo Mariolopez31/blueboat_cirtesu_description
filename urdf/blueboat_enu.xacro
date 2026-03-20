@@ -1,0 +1,84 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="blueboat">
+
+  <xacro:macro name="blueboat_macro" params="prefix">
+
+    <!-- =========================================================
+         1) Frame principal para ROS / FAST-LIO (ENU)
+         ========================================================= -->
+    <link name="${prefix}base_link_enu"/>
+
+    <!-- =========================================================
+         2) Frame legacy / autopiloto / NED
+         ========================================================= -->
+    <link name="${prefix}base_link"/>
+
+    <joint name="${prefix}enu_to_ned_joint" type="fixed">
+      <parent link="${prefix}base_link_enu"/>
+      <child  link="${prefix}base_link"/>
+      <origin xyz="0 0 0" rpy="3.1416 0 0.0"/>
+    </joint>
+
+    <link name="${prefix}base_link_visual">
+      <visual>
+        <origin rpy="3.1416 0 -1.5708" xyz="0 0 0"/>
+        <geometry>
+          <mesh filename="package://blueboat_description/meshes/blueboat.dae" scale="1 1 1"/>
+        </geometry>
+        <material name="blue">
+          <color rgba="0 0 1 1"/>
+        </material>
+      </visual>
+      <collision>
+        <origin rpy="3.1416 0 -1.5708" xyz="0 0 0"/>
+        <geometry>
+          <mesh filename="package://blueboat_description/meshes/blueboat.dae" scale="1 1 1"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <joint name="${prefix}base_link_visual_joint" type="fixed">
+      <parent link="${prefix}base_link"/>
+      <child  link="${prefix}base_link_visual"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </joint>
+
+    <link name="${prefix}ping_sonar_link">
+      <visual>
+        <origin xyz="0.0 0.0 0.0" rpy="0 -1.57 0"/>
+        <geometry>
+          <cylinder radius="0.03" length="0.1"/>
+        </geometry>
+        <material name="black">
+          <color rgba="0 0 0 1"/>
+        </material>
+      </visual>
+    </link>
+
+    <joint name="${prefix}ping_sonar_joint" type="fixed">
+      <parent link="${prefix}base_link"/>
+      <child link="${prefix}ping_sonar_link"/>
+      <origin xyz="-0.1 0.2 0.4" rpy="0 -1.57 0"/>
+    </joint>
+
+    <link name="livox_frame"/>
+
+    <joint name="${prefix}livox_joint" type="fixed">
+      <parent link="${prefix}base_link"/>
+      <child link="livox_frame"/>
+      <origin xyz="0.39 -0.36 -0.05" rpy="3.1416 0 1.57"/>
+    </joint>
+
+    <link name="gps_frame"/>
+
+    <joint name="${prefix}gps_joint" type="fixed">
+      <parent link="${prefix}base_link"/>
+      <child link="gps_frame"/>
+      <origin xyz="0.39 -0.36 -0.05" rpy="3.1416 0 1.57"/>
+    </joint>
+
+  </xacro:macro>
+
+  <xacro:blueboat_macro prefix="blueboat_"/>
+
+</robot>
