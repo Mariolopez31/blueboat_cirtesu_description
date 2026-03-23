@@ -5,7 +5,7 @@ from launch_ros.substitutions import FindPackageShare
 
 def generate_launch_description():
     xacro_file = PathJoinSubstitution([
-        FindPackageShare("blueboat_description"),
+        FindPackageShare("blueboat_cirtesu_description"),
         "urdf",
         "blueboat_enu.xacro"
     ])
