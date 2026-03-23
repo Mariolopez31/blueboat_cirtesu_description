@@ -79,6 +79,6 @@
 
   </xacro:macro>
 
-  <xacro:blueboat_macro prefix="blueboat_"/>
+  <xacro:blueboat_macro prefix="blueboat/"/>
 
 </robot>
