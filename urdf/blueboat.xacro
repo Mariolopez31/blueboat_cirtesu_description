@@ -8,7 +8,7 @@
       <visual>
         <origin rpy="3.1416 0 -1.5708" xyz="0 0 0" />
         <geometry>
-          <mesh filename="package://blueboat_description/meshes/blueboat.dae" scale="1 1 1"/>
+          <mesh filename="package://blueboat_cirtesu_description/meshes/blueboat.dae" scale="1 1 1"/>
         </geometry>
         <material name="blue">
           <color rgba="0 0 1 1"/>
@@ -17,7 +17,7 @@
       <collision>
         <origin rpy="3.1416 0 -1.5708" xyz="0 0 0" />
         <geometry>
-          <mesh filename="package://blueboat_description/meshes/blueboat.dae" scale="1 1 1"/>
+          <mesh filename="package://blueboat_cirtesu_description/meshes/blueboat.dae" scale="1 1 1"/>
         </geometry>
       </collision>
     </link>
@@ -68,6 +68,6 @@
   </xacro:macro>
 
   <!-- LLAMAR A LA MACRO -->
-  <xacro:blueboat_macro prefix="blueboat_"/>
+  <xacro:blueboat_macro prefix="blueboat/"/>
   
 </robot>
