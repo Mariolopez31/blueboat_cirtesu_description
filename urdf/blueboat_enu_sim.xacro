@@ -1,0 +1,127 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="blueboat">
+
+  <xacro:arg name="environment" default="sim"/>
+  <xacro:arg name="lookup_csv" default=""/>
+
+  <xacro:macro name="blueboat_macro" params="prefix">
+
+    <!-- =========================================================
+         1) base_link (ENU) -> lo usa FastLIO como body_frame
+         ========================================================= -->
+    <link name="${prefix}base_link_enu"/>        <!-- ENU -->
+    <link name="${prefix}base_link"/>            <!-- NED -->
+
+    <joint name="${prefix}enu_to_ned_joint" type="fixed">
+      <parent link="${prefix}base_link_enu"/>
+      <child  link="${prefix}base_link"/>
+      <origin xyz="0 0 0" rpy="3.1416 0 0"/>
+    </joint>
+
+    <!-- =========================================================
+         2) Mesh visual
+         ========================================================= -->
+    <link name="${prefix}base_link_urdf">
+      <visual>
+        <origin rpy="3.1416 0 -1.5708" xyz="0 0 0"/>
+        <geometry>
+          <mesh filename="package://blueboat_stonefish_core/meshes/blueboat.dae" scale="1 1 1"/>
+        </geometry>
+        <material name="blue">
+          <color rgba="0 0 1 1"/>
+        </material>
+      </visual>
+      <collision>
+        <origin rpy="3.1416 0 -1.5708" xyz="0 0 0"/>
+        <geometry>
+          <mesh filename="package://blueboat_stonefish_core/meshes/blueboat.dae" scale="1 1 1"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <joint name="${prefix}base_link_urdf_joint" type="fixed">
+      <parent link="${prefix}base_link"/>
+      <child  link="${prefix}base_link_urdf"/>
+      <origin xyz="-0.275 0 -0.23" rpy="0 0 0"/>
+    </joint>
+
+    <!-- Cámara -->
+    <link name="${prefix}camera_link"/>
+    <joint name="${prefix}camera_joint" type="fixed">
+      <parent link="${prefix}base_link"/>
+      <child link="${prefix}camera_link"/>
+      <origin xyz="0.45 0.0 0.1" rpy="0.0 0.0 0.0"/>
+    </joint>
+
+    <!-- LiDAR -->
+    <link name="${prefix}lidar_front"/>
+    <joint name="${prefix}lidar_joint" type="fixed">
+      <parent link="${prefix}base_link"/>
+      <child link="${prefix}lidar_front"/>
+      <origin xyz="0.115 -0.36 -1.25" rpy="3.1416 0.0 0.0"/>
+    </joint>
+
+    <!-- GPS -->
+    <link name="${prefix}gps_frame"/>
+    <joint name="${prefix}gps_joint" type="fixed">
+      <parent link="${prefix}base_link"/>
+      <child link="${prefix}gps_frame"/>
+      <origin xyz="-0.35 0.15 -0.35" rpy="0 0 0"/>
+    </joint>
+
+    <!-- IMU -->
+    <link name="${prefix}imu_link"/>
+    <joint name="${prefix}imu_joint" type="fixed">
+      <parent link="${prefix}base_link"/>
+      <child link="${prefix}imu_link"/>
+      <origin xyz="0.35 -0.35 -0.2" rpy="0.0 0.0 0.0"/>
+    </joint>
+
+    <!-- =========================================================
+         3) Thrusters para control
+         El body_force_controller usa estos joints/links para
+         construir la matriz de asignación automáticamente.
+         ========================================================= -->
+
+    <!-- En tu escena Stonefish:
+         Thruster_R -> xyz="-0.472 0.26 0.0245" rpy="1.57 0 0"
+         Thruster_L -> xyz="-0.472 -0.3 0.0245" rpy="1.57 0 0"
+    -->
+
+    <link name="${prefix}left_thruster_link"/>
+    <joint name="${prefix}left_thruster_joint" type="fixed">
+      <parent link="${prefix}base_link"/>
+      <child link="${prefix}left_thruster_link"/>
+      <origin xyz="-0.472 -0.3 0.0245" rpy="1.57 0.0 0.0"/>
+    </joint>
+
+    <link name="${prefix}right_thruster_link"/>
+    <joint name="${prefix}right_thruster_joint" type="fixed">
+      <parent link="${prefix}base_link"/>
+      <child link="${prefix}right_thruster_link"/>
+      <origin xyz="-0.472 0.26 0.0245" rpy="1.57 0.0 0.0"/>
+    </joint>
+
+  </xacro:macro>
+
+  <xacro:blueboat_macro prefix="blueboat/"/>
+
+  <ros2_control name="CatamaranSystem" type="system">
+    <hardware>
+      <plugin>catamaran_hardware_interface/CatamaranSystem</plugin>
+      <param name="environment">$(arg environment)</param>
+      <param name="lookup_csv">$(arg lookup_csv)</param>
+    </hardware>
+
+    <joint name="blueboat/left_thruster_joint">
+      <command_interface name="effort"/>
+      <state_interface name="effort"/>
+    </joint>
+
+    <joint name="blueboat/right_thruster_joint">
+      <command_interface name="effort"/>
+      <state_interface name="effort"/>
+    </joint>
+  </ros2_control>
+
+</robot>

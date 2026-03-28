@@ -1,6 +1,9 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="blueboat">
 
+  <xacro:arg name="environment" default="real"/>
+  <xacro:arg name="lookup_csv" default=""/>
+
   <xacro:macro name="blueboat_macro" params="prefix">
 
     <!-- =========================================================
@@ -76,6 +79,20 @@
       <child link="gps_frame"/>
       <origin xyz="0.39 -0.36 -0.05" rpy="3.1416 0 1.57"/>
     </joint>
+
+  <link name="${prefix}left_thruster_link"/>
+  <joint name="${prefix}left_thruster_joint" type="fixed">
+    <parent link="${prefix}base_link"/>
+    <child link="${prefix}left_thruster_link"/>
+    <origin xyz="X_LEFT Y_LEFT Z_LEFT" rpy="0 0 0"/>
+  </joint>
+
+  <link name="${prefix}right_thruster_link"/>
+  <joint name="${prefix}right_thruster_joint" type="fixed">
+    <parent link="${prefix}base_link"/>
+    <child link="${prefix}right_thruster_link"/>
+    <origin xyz="X_RIGHT Y_RIGHT Z_RIGHT" rpy="0 0 0"/>
+  </joint>
 
   </xacro:macro>
 
