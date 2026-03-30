@@ -36,12 +36,12 @@
       <param name="lookup_csv">$(arg lookup_csv)</param>
     </hardware>
 
-    <joint name="blueboat/left_thruster_joint">
+    <joint name="left_thruster_joint">
       <command_interface name="effort"/>
       <state_interface name="effort"/>
     </joint>
 
-    <joint name="blueboat/right_thruster_joint">
+    <joint name="right_thruster_joint">
       <command_interface name="effort"/>
       <state_interface name="effort"/>
     </joint>
