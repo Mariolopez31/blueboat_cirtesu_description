@@ -8,10 +8,8 @@
 
   <xacro:macro name="blueboat_thrusters_macro" params="prefix">
 
-    <!-- Link base mínimo -->
     <link name="${prefix}base_link"/>
 
-    <!-- Thruster izquierdo -->
     <link name="${prefix}left_thruster_link"/>
     <joint name="${prefix}left_thruster_joint" type="fixed">
       <parent link="${prefix}base_link"/>
@@ -19,12 +17,18 @@
       <origin xyz="-0.472 -0.3 0.0245" rpy="0.0 0.0 3.14159265"/>
     </joint>
 
-    <!-- Thruster derecho -->
     <link name="${prefix}right_thruster_link"/>
     <joint name="${prefix}right_thruster_joint" type="fixed">
       <parent link="${prefix}base_link"/>
       <child link="${prefix}right_thruster_link"/>
       <origin xyz="-0.472 0.3 0.0245" rpy="0.0 0.0 3.14159265"/>
+    </joint>
+
+    <link name="${prefix}imu_link"/>
+    <joint name="${prefix}imu_joint" type="fixed">
+      <parent link="${prefix}base_link"/>
+      <child link="${prefix}imu_link"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
     </joint>
 
   </xacro:macro>
@@ -33,7 +37,7 @@
 
   <ros2_control name="ThrustersSystem" type="system">
     <hardware>
-      <plugin>thrusters_hardware_interface/ThrustersSystem</plugin>
+      <plugin>sura_hardware_interface/ThrustersSystem</plugin>
       <param name="environment">$(arg environment)</param>
       <param name="lookup_csv">$(arg lookup_csv)</param>
       <param name="pwm_channels">$(arg pwm_channels)</param>
@@ -51,6 +55,27 @@
       <state_interface name="effort"/>
       <param name="inverted">true</param>
     </joint>
+  </ros2_control>
+
+  <ros2_control name="SensorsSystem" type="system">
+    <hardware>
+      <plugin>sura_hardware_interface/SensorsSystem</plugin>
+    </hardware>
+
+    <sensor name="imu_sensor">
+      <state_interface name="orientation.x"/>
+      <state_interface name="orientation.y"/>
+      <state_interface name="orientation.z"/>
+      <state_interface name="orientation.w"/>
+
+      <state_interface name="angular_velocity.x"/>
+      <state_interface name="angular_velocity.y"/>
+      <state_interface name="angular_velocity.z"/>
+
+      <state_interface name="linear_acceleration.x"/>
+      <state_interface name="linear_acceleration.y"/>
+      <state_interface name="linear_acceleration.z"/>
+    </sensor>
   </ros2_control>
 
 </robot>
