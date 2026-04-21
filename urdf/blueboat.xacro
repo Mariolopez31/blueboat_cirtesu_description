@@ -6,7 +6,11 @@
   <xacro:arg name="pwm_channels" default="0,2"/>
   <xacro:arg name="stonefish_topic" default="/catamaran/controller/thruster_setpoints_sim"/>
 
-  <xacro:macro name="blueboat_thrusters_macro" params="prefix">
+  <xacro:macro name="blueboat_thrusters_macro" params="prefix environment">
+
+    <xacro:property name="thruster_yaw" value="${0.0 if environment == 'sim' else 3.14159265}"/>
+    <xacro:property name="left_thruster_y" value="${-0.28 if environment == 'sim' else -0.3}"/>
+    <xacro:property name="right_thruster_y" value="${0.28 if environment == 'sim' else 0.3}"/>
 
     <link name="${prefix}base_link"/>
 
@@ -14,14 +18,14 @@
     <joint name="${prefix}left_thruster_joint" type="fixed">
       <parent link="${prefix}base_link"/>
       <child link="${prefix}left_thruster_link"/>
-      <origin xyz="-0.472 -0.3 0.0245" rpy="0.0 0.0 3.14159265"/>
+      <origin xyz="-0.472 ${left_thruster_y} 0.0245" rpy="0.0 0.0 ${thruster_yaw}"/>
     </joint>
 
     <link name="${prefix}right_thruster_link"/>
     <joint name="${prefix}right_thruster_joint" type="fixed">
       <parent link="${prefix}base_link"/>
       <child link="${prefix}right_thruster_link"/>
-      <origin xyz="-0.472 0.3 0.0245" rpy="0.0 0.0 3.14159265"/>
+      <origin xyz="-0.472 ${right_thruster_y} 0.0245" rpy="0.0 0.0 ${thruster_yaw}"/>
     </joint>
 
     <link name="${prefix}imu_link"/>
@@ -33,7 +37,7 @@
 
   </xacro:macro>
 
-  <xacro:blueboat_thrusters_macro prefix="blueboat/"/>
+  <xacro:blueboat_thrusters_macro prefix="blueboat/" environment="$(arg environment)"/>
 
   <ros2_control name="ThrustersSystem" type="system">
     <hardware>
