@@ -84,6 +84,12 @@
       <state_interface name="magnetic_field.y"/>
       <state_interface name="magnetic_field.z"/>
     </sensor>
+
+    <sensor name="battery_sensor">
+      <state_interface name="voltage"/>
+      <state_interface name="current"/>
+      <state_interface name="present"/>
+    </sensor>
   </ros2_control>
 
 </robot>
