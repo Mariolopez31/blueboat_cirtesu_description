@@ -4,6 +4,7 @@
   <xacro:arg name="environment" default="real"/>
   <xacro:arg name="lookup_csv" default=""/>
   <xacro:arg name="pwm_channels" default="0,2"/>
+  <xacro:arg name="status_light_channel" default="1"/>
   <xacro:arg name="stonefish_topic" default="/catamaran/controller/thruster_setpoints_sim"/>
   <xacro:arg name="gps_protocol" default="ubx"/>
   <xacro:arg name="gps_serial_port" default="/dev/ttyAMA5"/>
@@ -45,6 +46,13 @@
       <origin xyz="0.39 -0.36 -0.05" rpy="3.1416 0 1.57"/>
     </joint>
 
+    <link name="${prefix}status_light_link"/>
+    <joint name="${prefix}status_light_joint" type="fixed">
+      <parent link="${prefix}base_link"/>
+      <child link="${prefix}status_light_link"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </joint>
+
   </xacro:macro>
 
   <xacro:blueboat_thrusters_macro prefix="blueboat/" environment="$(arg environment)"/>
@@ -68,6 +76,19 @@
       <command_interface name="effort"/>
       <state_interface name="effort"/>
       <param name="inverted">true</param>
+    </joint>
+  </ros2_control>
+
+  <ros2_control name="ActuatorsSystem" type="system">
+    <hardware>
+      <plugin>sura_hardware_interface/ActuatorsSystem</plugin>
+      <param name="environment">$(arg environment)</param>
+      <param name="status_light_channel">$(arg status_light_channel)</param>
+    </hardware>
+
+    <joint name="blueboat/status_light_joint">
+      <command_interface name="enabled"/>
+      <state_interface name="enabled"/>
     </joint>
   </ros2_control>
 
