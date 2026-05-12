@@ -5,6 +5,9 @@
   <xacro:arg name="lookup_csv" default=""/>
   <xacro:arg name="pwm_channels" default="0,2"/>
   <xacro:arg name="stonefish_topic" default="/catamaran/controller/thruster_setpoints_sim"/>
+  <xacro:arg name="gps_protocol" default="ubx"/>
+  <xacro:arg name="gps_serial_port" default="/dev/ttyAMA5"/>
+  <xacro:arg name="gps_baudrate" default="230400"/>
 
   <xacro:macro name="blueboat_thrusters_macro" params="prefix environment">
 
@@ -33,6 +36,13 @@
       <parent link="${prefix}base_link"/>
       <child link="${prefix}imu_link"/>
       <origin xyz="0 0 0" rpy="0 0 0"/>
+    </joint>
+
+    <link name="gps_frame"/>
+    <joint name="${prefix}gps_joint" type="fixed">
+      <parent link="${prefix}base_link"/>
+      <child link="gps_frame"/>
+      <origin xyz="0.39 -0.36 -0.05" rpy="3.1416 0 1.57"/>
     </joint>
 
   </xacro:macro>
@@ -64,6 +74,10 @@
   <ros2_control name="SensorsSystem" type="system">
     <hardware>
       <plugin>sura_hardware_interface/SensorsSystem</plugin>
+      <param name="environment">$(arg environment)</param>
+      <param name="gps_protocol">$(arg gps_protocol)</param>
+      <param name="gps_serial_port">$(arg gps_serial_port)</param>
+      <param name="gps_baudrate">$(arg gps_baudrate)</param>
     </hardware>
 
     <sensor name="imu_sensor">
@@ -89,6 +103,13 @@
       <state_interface name="voltage"/>
       <state_interface name="current"/>
       <state_interface name="present"/>
+    </sensor>
+
+    <sensor name="gps_sensor">
+      <state_interface name="gps.latitude"/>
+      <state_interface name="gps.longitude"/>
+      <state_interface name="gps.altitude"/>
+      <state_interface name="gps.valid"/>
     </sensor>
   </ros2_control>
 
