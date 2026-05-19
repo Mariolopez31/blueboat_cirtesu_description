@@ -5,10 +5,12 @@
   <xacro:arg name="lookup_csv" default=""/>
   <xacro:arg name="pwm_channels" default="0,2"/>
   <xacro:arg name="status_light_channel" default="1"/>
+  <xacro:arg name="enable_status_light" default="true"/>
   <xacro:arg name="stonefish_topic" default="/catamaran/controller/thruster_setpoints_sim"/>
   <xacro:arg name="gps_protocol" default="ubx"/>
   <xacro:arg name="gps_serial_port" default="/dev/ttyAMA5"/>
   <xacro:arg name="gps_baudrate" default="230400"/>
+  <xacro:arg name="enable_battery" default="true"/>
 
   <xacro:macro name="blueboat_thrusters_macro" params="prefix environment">
 
@@ -79,18 +81,20 @@
     </joint>
   </ros2_control>
 
-  <ros2_control name="ActuatorsSystem" type="system">
-    <hardware>
-      <plugin>sura_hardware_interface/ActuatorsSystem</plugin>
-      <param name="environment">$(arg environment)</param>
-      <param name="status_light_channel">$(arg status_light_channel)</param>
-    </hardware>
+  <xacro:if value="$(arg enable_status_light)">
+    <ros2_control name="ActuatorsSystem" type="system">
+      <hardware>
+        <plugin>sura_hardware_interface/ActuatorsSystem</plugin>
+        <param name="environment">$(arg environment)</param>
+        <param name="status_light_channel">$(arg status_light_channel)</param>
+      </hardware>
 
-    <joint name="blueboat/status_light_joint">
-      <command_interface name="enabled"/>
-      <state_interface name="enabled"/>
-    </joint>
-  </ros2_control>
+      <joint name="blueboat/status_light_joint">
+        <command_interface name="enabled"/>
+        <state_interface name="enabled"/>
+      </joint>
+    </ros2_control>
+  </xacro:if>
 
   <ros2_control name="SensorsSystem" type="system">
     <hardware>
@@ -120,11 +124,13 @@
       <state_interface name="magnetic_field.z"/>
     </sensor>
 
-    <sensor name="battery_sensor">
-      <state_interface name="voltage"/>
-      <state_interface name="current"/>
-      <state_interface name="present"/>
-    </sensor>
+    <xacro:if value="$(arg enable_battery)">
+      <sensor name="battery_sensor">
+        <state_interface name="voltage"/>
+        <state_interface name="current"/>
+        <state_interface name="present"/>
+      </sensor>
+    </xacro:if>
 
     <sensor name="gps_sensor">
       <state_interface name="gps.latitude"/>
