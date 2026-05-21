@@ -4,7 +4,7 @@ robot:
   environment: real
 
 description:
-  package: blueboat_cirtesu_description
+  package: blueboat_description
   launch_file: robot_description.launch.py
   xacro: urdf/blueboat.xacro
   xacro_args:

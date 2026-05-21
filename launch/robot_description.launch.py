@@ -10,7 +10,7 @@ from launch_ros.actions import Node
 
 
 def launch_setup(context, *args, **kwargs):
-    package_share = get_package_share_directory("blueboat_cirtesu_description")
+    package_share = get_package_share_directory("blueboat_description")
     xacro_relative_path = LaunchConfiguration("xacro_file").perform(context)
     if not xacro_relative_path:
         xacro_relative_path = os.path.join("urdf", "blueboat.xacro")
