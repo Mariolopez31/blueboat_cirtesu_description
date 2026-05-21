@@ -2,7 +2,9 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="blueboat">
 
   <xacro:arg name="environment" default="sim"/>
+  <xacro:arg name="robot_namespace" default="blueboat"/>
   <xacro:arg name="lookup_csv" default=""/>
+  <xacro:arg name="stonefish_topic" default="/blueboat/catamaran/controller/thruster_setpoints_sim"/>
 
   <xacro:macro name="blueboat_macro" params="prefix">
 
@@ -104,21 +106,22 @@
 
   </xacro:macro>
 
-  <xacro:blueboat_macro prefix="blueboat/"/>
+  <xacro:blueboat_macro prefix="$(arg robot_namespace)/"/>
 
   <ros2_control name="CatamaranSystem" type="system">
     <hardware>
       <plugin>catamaran_hardware_interface/CatamaranSystem</plugin>
       <param name="environment">$(arg environment)</param>
       <param name="lookup_csv">$(arg lookup_csv)</param>
+      <param name="stonefish_topic">$(arg stonefish_topic)</param>
     </hardware>
 
-    <joint name="blueboat/left_thruster_joint">
+    <joint name="$(arg robot_namespace)/left_thruster_joint">
       <command_interface name="effort"/>
       <state_interface name="effort"/>
     </joint>
 
-    <joint name="blueboat/right_thruster_joint">
+    <joint name="$(arg robot_namespace)/right_thruster_joint">
       <command_interface name="effort"/>
       <state_interface name="effort"/>
     </joint>

@@ -2,60 +2,94 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="blueboat">
 
   <xacro:arg name="environment" default="real"/>
+  <xacro:arg name="robot_namespace" default="blueboat"/>
   <xacro:arg name="lookup_csv" default=""/>
   <xacro:arg name="pwm_channels" default="0,2"/>
   <xacro:arg name="status_light_channel" default="1"/>
-  <xacro:arg name="stonefish_topic" default="/catamaran/controller/thruster_setpoints_sim"/>
+  <xacro:arg name="stonefish_topic" default="/blueboat/catamaran/controller/thruster_setpoints_sim"/>
   <xacro:arg name="gps_protocol" default="ubx"/>
   <xacro:arg name="gps_serial_port" default="/dev/ttyAMA5"/>
   <xacro:arg name="gps_baudrate" default="230400"/>
 
-  <xacro:macro name="blueboat_thrusters_macro" params="prefix environment">
+  <xacro:property name="robot_prefix" value="$(arg robot_namespace)/"/>
+  <xacro:property name="robot_namespace" value="$(arg robot_namespace)"/>
+  <xacro:property name="environment" value="$(arg environment)"/>
+  <xacro:property name="thruster_yaw" value="${0.0 if environment == 'sim' else 3.14159265}"/>
+  <xacro:property name="left_thruster_y" value="${-0.28 if environment == 'sim' else -0.3}"/>
+  <xacro:property name="right_thruster_y" value="${0.28 if environment == 'sim' else 0.3}"/>
 
-    <xacro:property name="thruster_yaw" value="${0.0 if environment == 'sim' else 3.14159265}"/>
-    <xacro:property name="left_thruster_y" value="${-0.28 if environment == 'sim' else -0.3}"/>
-    <xacro:property name="right_thruster_y" value="${0.28 if environment == 'sim' else 0.3}"/>
+  <!-- ========================================================= -->
+  <!-- TF -->
+  <!-- ========================================================= -->
 
-    <link name="${prefix}base_link"/>
+  <link name="${robot_prefix}base_link_enu" tf_type="base"/>
+  <link name="${robot_prefix}base_link" tf_type="base"/>
 
-    <link name="${prefix}left_thruster_link"/>
-    <joint name="${prefix}left_thruster_joint" type="fixed">
-      <parent link="${prefix}base_link"/>
-      <child link="${prefix}left_thruster_link"/>
-      <origin xyz="-0.472 ${left_thruster_y} 0.0245" rpy="0.0 0.0 ${thruster_yaw}"/>
-    </joint>
+  <joint name="${robot_prefix}enu_to_ned_joint" type="fixed">
+    <parent link="${robot_prefix}base_link_enu"/>
+    <child link="${robot_prefix}base_link"/>
+    <origin xyz="0 0 0" rpy="3.14159265359 0 0"/>
+  </joint>
 
-    <link name="${prefix}right_thruster_link"/>
-    <joint name="${prefix}right_thruster_joint" type="fixed">
-      <parent link="${prefix}base_link"/>
-      <child link="${prefix}right_thruster_link"/>
-      <origin xyz="-0.472 ${right_thruster_y} 0.0245" rpy="0.0 0.0 ${thruster_yaw}"/>
-    </joint>
+  <!-- ========================================================= -->
+  <!-- Sensors -->
+  <!-- ========================================================= -->
 
-    <link name="${prefix}imu_link"/>
-    <joint name="${prefix}imu_joint" type="fixed">
-      <parent link="${prefix}base_link"/>
-      <child link="${prefix}imu_link"/>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-    </joint>
+  <link name="${robot_prefix}imu_link" tf_type="sensor"/>
+  <joint name="${robot_prefix}imu_joint" type="fixed">
+    <parent link="${robot_prefix}base_link"/>
+    <child link="${robot_prefix}imu_link"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
 
-    <link name="gps_frame"/>
-    <joint name="${prefix}gps_joint" type="fixed">
-      <parent link="${prefix}base_link"/>
-      <child link="gps_frame"/>
-      <origin xyz="0.39 -0.36 -0.05" rpy="3.1416 0 1.57"/>
-    </joint>
+  <link name="${robot_prefix}lidar_front" tf_type="sensor"/>
+  <joint name="${robot_prefix}lidar_joint" type="fixed">
+    <parent link="${robot_prefix}base_link"/>
+    <child link="${robot_prefix}lidar_front"/>
+    <origin xyz="0.39 -0.36 -0.05" rpy="3.1416 0 1.57"/>
+  </joint>
 
-    <link name="${prefix}status_light_link"/>
-    <joint name="${prefix}status_light_joint" type="fixed">
-      <parent link="${prefix}base_link"/>
-      <child link="${prefix}status_light_link"/>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-    </joint>
+  <link name="${robot_prefix}gps_frame" tf_type="sensor"/>
+  <joint name="${robot_prefix}gps_joint" type="fixed">
+    <parent link="${robot_prefix}base_link"/>
+    <child link="${robot_prefix}gps_frame"/>
+    <origin xyz="0.39 -0.36 -0.05" rpy="3.1416 0 1.57"/>
+  </joint>
 
-  </xacro:macro>
+  <!-- ========================================================= -->
+  <!-- Thrusters -->
+  <!-- ========================================================= -->
 
-  <xacro:blueboat_thrusters_macro prefix="blueboat/" environment="$(arg environment)"/>
+  <link name="${robot_prefix}left_thruster_link" tf_type="thruster"/>
+  <joint name="${robot_prefix}left_thruster_joint" type="fixed">
+    <parent link="${robot_prefix}base_link"/>
+    <child link="${robot_prefix}left_thruster_link"/>
+    <origin xyz="-0.472 ${left_thruster_y} 0.0245" rpy="0.0 0.0 ${thruster_yaw}"/>
+  </joint>
+
+  <link name="${robot_prefix}right_thruster_link" tf_type="thruster"/>
+  <joint name="${robot_prefix}right_thruster_joint" type="fixed">
+    <parent link="${robot_prefix}base_link"/>
+    <child link="${robot_prefix}right_thruster_link"/>
+    <origin xyz="-0.472 ${right_thruster_y} 0.0245" rpy="0.0 0.0 ${thruster_yaw}"/>
+  </joint>
+
+  <!-- ========================================================= -->
+  <!-- Actuators -->
+  <!-- ========================================================= -->
+
+  <!--
+  <link name="${robot_prefix}status_light_link" tf_type="actuator"/>
+  <joint name="${robot_prefix}status_light_joint" type="fixed">
+    <parent link="${robot_prefix}base_link"/>
+    <child link="${robot_prefix}status_light_link"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+  -->
+
+  <!-- ========================================================= -->
+  <!-- ROS2 CONTROL -->
+  <!-- ========================================================= -->
 
   <ros2_control name="ThrustersSystem" type="system">
     <hardware>
@@ -66,42 +100,56 @@
       <param name="stonefish_topic">$(arg stonefish_topic)</param>
     </hardware>
 
-    <joint name="blueboat/left_thruster_joint">
+    <joint name="${robot_prefix}left_thruster_joint">
       <command_interface name="effort"/>
       <state_interface name="effort"/>
+      <param name="role">thruster</param>
+      <param name="controller">body_force_controller</param>
       <param name="inverted">false</param>
     </joint>
 
-    <joint name="blueboat/right_thruster_joint">
+    <joint name="${robot_prefix}right_thruster_joint">
       <command_interface name="effort"/>
       <state_interface name="effort"/>
+      <param name="role">thruster</param>
+      <param name="controller">body_force_controller</param>
       <param name="inverted">true</param>
     </joint>
   </ros2_control>
 
+  <!--
   <ros2_control name="ActuatorsSystem" type="system">
     <hardware>
       <plugin>sura_hardware_interface/ActuatorsSystem</plugin>
       <param name="environment">$(arg environment)</param>
-      <param name="status_light_channel">$(arg status_light_channel)</param>
+      <param name="status_light_channel">1</param>
     </hardware>
 
-    <joint name="blueboat/status_light_joint">
+    <joint name="${robot_prefix}status_light_joint">
       <command_interface name="enabled"/>
       <state_interface name="enabled"/>
+      <param name="role">actuator</param>
+      <param name="controller">status_light_controller</param>
     </joint>
   </ros2_control>
+  -->
 
   <ros2_control name="SensorsSystem" type="system">
     <hardware>
       <plugin>sura_hardware_interface/SensorsSystem</plugin>
       <param name="environment">$(arg environment)</param>
+      <param name="robot_namespace">$(arg robot_namespace)</param>
       <param name="gps_protocol">$(arg gps_protocol)</param>
       <param name="gps_serial_port">$(arg gps_serial_port)</param>
       <param name="gps_baudrate">$(arg gps_baudrate)</param>
     </hardware>
 
     <sensor name="imu_sensor">
+      <param name="interface">sura_hardware_interface/ImuInterface</param>
+      <param name="broadcaster">imu_broadcaster</param>
+      <param name="read_rate_hz">200.0</param>
+      <param name="frame_id">${robot_prefix}imu_link</param>
+      <param name="stonefish_topic">/${robot_namespace}/stonefish/sensors/imu</param>
       <state_interface name="orientation.x"/>
       <state_interface name="orientation.y"/>
       <state_interface name="orientation.z"/>
@@ -115,18 +163,34 @@
     </sensor>
 
     <sensor name="magnetometer_sensor">
+      <param name="interface">sura_hardware_interface/MagnetometerInterface</param>
+      <param name="broadcaster">magnetometer_broadcaster</param>
+      <param name="read_rate_hz">50.0</param>
+      <param name="frame_id">${robot_prefix}imu_link</param>
+      <param name="stonefish_topic">/${robot_namespace}/stonefish/sensors/magnetometer</param>
       <state_interface name="magnetic_field.x"/>
       <state_interface name="magnetic_field.y"/>
       <state_interface name="magnetic_field.z"/>
     </sensor>
 
+    <!--
     <sensor name="battery_sensor">
+      <param name="interface">sura_hardware_interface/BatteryInterface</param>
+      <param name="broadcaster">battery_broadcaster</param>
+      <param name="read_rate_hz">2.0</param>
+      <param name="frame_id">${robot_prefix}base_link</param>
       <state_interface name="voltage"/>
       <state_interface name="current"/>
       <state_interface name="present"/>
     </sensor>
+    -->
 
     <sensor name="gps_sensor">
+      <param name="interface">sura_hardware_interface/GpsInterface</param>
+      <param name="broadcaster">gps_broadcaster</param>
+      <param name="read_rate_hz">1.0</param>
+      <param name="frame_id">${robot_prefix}gps_frame</param>
+      <param name="stonefish_topic">/${robot_namespace}/stonefish/sensors/gps</param>
       <state_interface name="gps.latitude"/>
       <state_interface name="gps.longitude"/>
       <state_interface name="gps.altitude"/>
