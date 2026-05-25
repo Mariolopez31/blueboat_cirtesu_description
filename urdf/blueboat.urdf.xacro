@@ -90,6 +90,7 @@
       <param name="lookup_csv">$(arg lookup_csv)</param>
       <param name="stonefish_topic">$(arg stonefish_topic)</param>
       <param name="inverted">false</param>
+      <param name="pwm_offset">0.0</param>
       <param name="channel">0</param>
     </joint>
 
@@ -99,6 +100,7 @@
       <param name="lookup_csv">$(arg lookup_csv)</param>
       <param name="stonefish_topic">$(arg stonefish_topic)</param>
       <param name="inverted">true</param>
+      <param name="pwm_offset">10.0</param>
       <param name="channel">2</param>
     </joint>
   </ros2_control>
@@ -157,8 +159,19 @@
       <param name="read_rate_hz">20.0</param>
       <param name="serial_port">/dev/ttyAMA3</param>
       <param name="baudrate">115200</param>
+      <param name="timeout_ms">500</param>
+      <param name="speed_of_sound">1450000</param>
+      <param name="ping_interval">100</param>
+      <param name="gain_setting">1</param>
+      <param name="scan_start">100</param>
+      <param name="scan_length">3000</param>
+      <param name="mode_auto">0</param>
       <param name="frame_id">${robot_prefix}altimeter_link</param>
       <state_interface name="altitude"/>
+      <state_interface name="confidence"/>
+      <state_interface name="scan_start"/>
+      <state_interface name="scan_length"/>
+      <state_interface name="gain_setting"/>
     </sensor>
    
 

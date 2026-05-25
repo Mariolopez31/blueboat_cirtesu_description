@@ -32,6 +32,21 @@ navigation:
   launch_package: sura_navigator
   launch_file: navigator.launch.py
 
+sensors:
+  ping_sonar:
+    enabled: true
+    real_only: true
+    package: ping_sonar_ros
+    executable: ping1d_node
+    port: /dev/ttyAMA3
+    speed: 1450000
+    interval_num: 100
+    gain_num: 1
+    scan_start: 100
+    scan_lenght: 3000
+    mode_auto: 0
+    output_topic: /blueboat/sensors/altimeter
+
 teleop:
   enabled: false
   launch_package: sura_teleop
