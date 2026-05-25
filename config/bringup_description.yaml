@@ -6,22 +6,17 @@ robot:
 description:
   package: blueboat_description
   launch_file: robot_description.launch.py
-  xacro: urdf/blueboat.xacro
+  xacro: urdf/blueboat.urdf.xacro
   xacro_args:
     environment: real
     robot_namespace: blueboat
-    lookup_csv: ""
-    pwm_channels: "0,2"
-    stonefish_topic: /blueboat/catamaran/controller/thruster_setpoints_sim
-    gps_protocol: ubx
-    gps_serial_port: /dev/ttyAMA5
-    gps_baudrate: 230400
+    family: surface
 
 ros2_control:
   enabled: true
   launch_package: sura_bringup
   launch_file: sura_controllers.launch.py
-  params_package: blueboat_bringup
+  params_package: blueboat_description
   params: config/ros2_control_params.yaml
 
 localization:
@@ -38,7 +33,7 @@ navigation:
   launch_file: navigator.launch.py
 
 teleop:
-  enabled: true
+  enabled: false
   launch_package: sura_teleop
   launch_file: teleop.launch.py
   robot: blueboat

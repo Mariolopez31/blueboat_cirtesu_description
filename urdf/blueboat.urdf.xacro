@@ -1,26 +1,15 @@
 <?xml version="1.0"?>
-<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="blueboat">
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="blueboat" family="$(arg family)">
 
   <xacro:arg name="environment" default="real"/>
   <xacro:arg name="robot_namespace" default="blueboat"/>
-  <xacro:arg name="lookup_csv" default=""/>
-  <xacro:arg name="pwm_channels" default="0,2"/>
-  <xacro:arg name="status_light_channel" default="1"/>
-  <xacro:arg name="stonefish_topic" default="/blueboat/catamaran/controller/thruster_setpoints_sim"/>
-  <xacro:arg name="gps_protocol" default="ubx"/>
-  <xacro:arg name="gps_serial_port" default="/dev/ttyAMA5"/>
-  <xacro:arg name="gps_baudrate" default="230400"/>
+  <xacro:arg name="family" default="surface"/>
+  <xacro:arg name="lookup_csv" default="config/m200_lookup.csv"/>
+  <xacro:arg name="stonefish_topic" default="/$(arg robot_namespace)/controller/thruster_setpoints_sim"/>
 
   <xacro:property name="robot_prefix" value="$(arg robot_namespace)/"/>
-  <xacro:property name="robot_namespace" value="$(arg robot_namespace)"/>
-  <xacro:property name="environment" value="$(arg environment)"/>
-  <xacro:property name="thruster_yaw" value="${0.0 if environment == 'sim' else 3.14159265}"/>
-  <xacro:property name="left_thruster_y" value="${-0.28 if environment == 'sim' else -0.3}"/>
-  <xacro:property name="right_thruster_y" value="${0.28 if environment == 'sim' else 0.3}"/>
 
-  <!-- ========================================================= -->
   <!-- TF -->
-  <!-- ========================================================= -->
 
   <link name="${robot_prefix}base_link_enu" tf_type="base"/>
   <link name="${robot_prefix}base_link" tf_type="base"/>
@@ -31,9 +20,7 @@
     <origin xyz="0 0 0" rpy="3.14159265359 0 0"/>
   </joint>
 
-  <!-- ========================================================= -->
   <!-- Sensors -->
-  <!-- ========================================================= -->
 
   <link name="${robot_prefix}imu_link" tf_type="sensor"/>
   <joint name="${robot_prefix}imu_joint" type="fixed">
@@ -56,27 +43,29 @@
     <origin xyz="0.39 -0.36 -0.05" rpy="3.1416 0 1.57"/>
   </joint>
 
-  <!-- ========================================================= -->
+  <link name="${robot_prefix}altimeter_link" tf_type="sensor"/>
+  <joint name="${robot_prefix}altimeter_joint" type="fixed">
+    <parent link="${robot_prefix}base_link"/>
+    <child link="${robot_prefix}altimeter_link"/>
+    <origin xyz="-0.240439 0.067376 -0.35413" rpy="3.1416 0 1.57"/>
+  </joint>
   <!-- Thrusters -->
-  <!-- ========================================================= -->
 
   <link name="${robot_prefix}left_thruster_link" tf_type="thruster"/>
   <joint name="${robot_prefix}left_thruster_joint" type="fixed">
     <parent link="${robot_prefix}base_link"/>
     <child link="${robot_prefix}left_thruster_link"/>
-    <origin xyz="-0.472 ${left_thruster_y} 0.0245" rpy="0.0 0.0 ${thruster_yaw}"/>
+    <origin xyz="-0.472 -0.28 0.0245" rpy="0.0 0.0 0.0"/>
   </joint>
 
   <link name="${robot_prefix}right_thruster_link" tf_type="thruster"/>
   <joint name="${robot_prefix}right_thruster_joint" type="fixed">
     <parent link="${robot_prefix}base_link"/>
     <child link="${robot_prefix}right_thruster_link"/>
-    <origin xyz="-0.472 ${right_thruster_y} 0.0245" rpy="0.0 0.0 ${thruster_yaw}"/>
+    <origin xyz="-0.472 0.28 0.0245" rpy="0.0 0.0 0.0"/>
   </joint>
 
-  <!-- ========================================================= -->
   <!-- Actuators -->
-  <!-- ========================================================= -->
 
   <!--
   <link name="${robot_prefix}status_light_link" tf_type="actuator"/>
@@ -87,61 +76,37 @@
   </joint>
   -->
 
-  <!-- ========================================================= -->
   <!-- ROS2 CONTROL -->
-  <!-- ========================================================= -->
 
-  <ros2_control name="ThrustersSystem" type="system">
+  <ros2_control name="blueboat_thrusters" type="system">
     <hardware>
       <plugin>sura_hardware_interface/ThrustersSystem</plugin>
       <param name="environment">$(arg environment)</param>
-      <param name="lookup_csv">$(arg lookup_csv)</param>
-      <param name="pwm_channels">$(arg pwm_channels)</param>
-      <param name="stonefish_topic">$(arg stonefish_topic)</param>
     </hardware>
 
     <joint name="${robot_prefix}left_thruster_joint">
       <command_interface name="effort"/>
       <state_interface name="effort"/>
-      <param name="role">thruster</param>
-      <param name="controller">body_force_controller</param>
+      <param name="lookup_csv">$(arg lookup_csv)</param>
+      <param name="stonefish_topic">$(arg stonefish_topic)</param>
       <param name="inverted">false</param>
+      <param name="channel">0</param>
     </joint>
 
     <joint name="${robot_prefix}right_thruster_joint">
       <command_interface name="effort"/>
       <state_interface name="effort"/>
-      <param name="role">thruster</param>
-      <param name="controller">body_force_controller</param>
+      <param name="lookup_csv">$(arg lookup_csv)</param>
+      <param name="stonefish_topic">$(arg stonefish_topic)</param>
       <param name="inverted">true</param>
+      <param name="channel">2</param>
     </joint>
   </ros2_control>
 
-  <!--
-  <ros2_control name="ActuatorsSystem" type="system">
-    <hardware>
-      <plugin>sura_hardware_interface/ActuatorsSystem</plugin>
-      <param name="environment">$(arg environment)</param>
-      <param name="status_light_channel">1</param>
-    </hardware>
-
-    <joint name="${robot_prefix}status_light_joint">
-      <command_interface name="enabled"/>
-      <state_interface name="enabled"/>
-      <param name="role">actuator</param>
-      <param name="controller">status_light_controller</param>
-    </joint>
-  </ros2_control>
-  -->
-
-  <ros2_control name="SensorsSystem" type="system">
+  <ros2_control name="blueboat_sensors" type="system">
     <hardware>
       <plugin>sura_hardware_interface/SensorsSystem</plugin>
       <param name="environment">$(arg environment)</param>
-      <param name="robot_namespace">$(arg robot_namespace)</param>
-      <param name="gps_protocol">$(arg gps_protocol)</param>
-      <param name="gps_serial_port">$(arg gps_serial_port)</param>
-      <param name="gps_baudrate">$(arg gps_baudrate)</param>
     </hardware>
 
     <sensor name="imu_sensor">
@@ -149,7 +114,8 @@
       <param name="broadcaster">imu_broadcaster</param>
       <param name="read_rate_hz">200.0</param>
       <param name="frame_id">${robot_prefix}imu_link</param>
-      <param name="stonefish_topic">/${robot_namespace}/stonefish/sensors/imu</param>
+      <param name="stonefish_topic">/$(arg robot_namespace)/stonefish/sensors/imu</param>
+      <param name="msg_type">sensor_msgs/msg/Imu</param>
       <state_interface name="orientation.x"/>
       <state_interface name="orientation.y"/>
       <state_interface name="orientation.z"/>
@@ -167,13 +133,14 @@
       <param name="broadcaster">magnetometer_broadcaster</param>
       <param name="read_rate_hz">50.0</param>
       <param name="frame_id">${robot_prefix}imu_link</param>
-      <param name="stonefish_topic">/${robot_namespace}/stonefish/sensors/magnetometer</param>
+      <param name="stonefish_topic">/$(arg robot_namespace)/stonefish/sensors/magnetometer</param>
+      <param name="msg_type">sensor_msgs/msg/MagneticField</param>
       <state_interface name="magnetic_field.x"/>
       <state_interface name="magnetic_field.y"/>
       <state_interface name="magnetic_field.z"/>
     </sensor>
 
-    <!--
+    
     <sensor name="battery_sensor">
       <param name="interface">sura_hardware_interface/BatteryInterface</param>
       <param name="broadcaster">battery_broadcaster</param>
@@ -183,19 +150,49 @@
       <state_interface name="current"/>
       <state_interface name="present"/>
     </sensor>
-    -->
+
+    <sensor name="altimeter_sensor">
+      <param name="interface">sura_hardware_interface/AltimeterBlueboatInterface</param>
+      <param name="broadcaster">altimeter_broadcaster</param>
+      <param name="read_rate_hz">20.0</param>
+      <param name="serial_port">/dev/ttyAMA3</param>
+      <param name="baudrate">115200</param>
+      <param name="frame_id">${robot_prefix}altimeter_link</param>
+      <state_interface name="altitude"/>
+    </sensor>
+   
 
     <sensor name="gps_sensor">
       <param name="interface">sura_hardware_interface/GpsInterface</param>
       <param name="broadcaster">gps_broadcaster</param>
       <param name="read_rate_hz">1.0</param>
+      <param name="gps_protocol">ubx</param>
+      <param name="gps_serial_port">/dev/ttyAMA5</param>
+      <param name="gps_baudrate">230400</param>
       <param name="frame_id">${robot_prefix}gps_frame</param>
-      <param name="stonefish_topic">/${robot_namespace}/stonefish/sensors/gps</param>
+      <param name="stonefish_topic">/$(arg robot_namespace)/stonefish/sensors/gps</param>
+      <param name="msg_type">sensor_msgs/msg/NavSatFix</param>
       <state_interface name="gps.latitude"/>
       <state_interface name="gps.longitude"/>
       <state_interface name="gps.altitude"/>
       <state_interface name="gps.valid"/>
     </sensor>
+  </ros2_control>
+
+  <ros2_control name="blueboat_actuators" type="system">
+    <hardware>
+      <plugin>sura_hardware_interface/ActuatorsSystem</plugin>
+      <param name="environment">$(arg environment)</param>
+      <param name="status_light_channel">1</param>
+    </hardware>
+
+    <joint name="${robot_prefix}status_light_joint">
+      <param name="interface">sura_hardware_interface/LightBlueboatInterface</param>
+      <command_interface name="enabled"/>
+      <state_interface name="enabled"/>
+      <param name="channel">1</param>
+      <param name="controller">status_light_controller</param>
+    </joint>
   </ros2_control>
 
 </robot>

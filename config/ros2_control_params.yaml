@@ -1,0 +1,165 @@
+/blueboat/controller/controller_manager:
+  ros__parameters:
+    update_rate: 200
+
+    common_controllers:
+      - thruster_test_controller
+
+    usv_controllers:
+      - body_force_controller
+      - body_velocity_controller
+      - body_position_controller
+
+    hardware_components_initial_state:
+      inactive:
+        - blueboat_actuators
+      active:
+        - blueboat_thrusters
+        - blueboat_sensors
+
+    thruster_test_controller:
+      type: forward_command_controller/ForwardCommandController
+
+    status_light_controller:
+      type: forward_command_controller/ForwardCommandController
+
+    body_force_controller:
+      type: sura_controllers/usv/BodyForceController
+    
+    body_velocity_controller:
+      type: sura_controllers/usv/BodyVelocityController
+
+    body_position_controller:
+      type: sura_controllers/usv/BodyPositionController
+
+    imu_broadcaster:
+      type: imu_sensor_broadcaster/IMUSensorBroadcaster
+
+    magnetometer_broadcaster:
+      type: sura_sensors/MagnetometerBroadcaster
+
+    gps_broadcaster:
+      type: sura_sensors/GpsBroadcaster
+
+    altimeter_broadcaster:
+      type: sura_sensors/AltimeterBlueboatBroadcaster
+
+    battery_broadcaster:
+      type: sura_sensors/BatteryBroadcaster
+
+/blueboat/controller/thruster_test_controller:
+  ros__parameters:
+    joints:
+      - blueboat/left_thruster_joint
+      - blueboat/right_thruster_joint
+    interface_name: effort
+
+/blueboat/controller/status_light_controller:
+  ros__parameters:
+    joints:
+      - blueboat/status_light_joint
+    interface_name: enabled
+
+/blueboat/controller/body_force_controller:
+  ros__parameters:
+    input_topic: /body_force/command
+    base_link: blueboat/base_link
+    thruster_joints:
+      - blueboat/left_thruster_joint
+      - blueboat/right_thruster_joint
+
+/blueboat/controller/body_velocity_controller:
+  ros__parameters:
+    cmd_vel_topic: /cmd_vel
+    navigator_topic: /navigator_msg
+    body_force_controller_name: body_force_controller
+
+    kp_u: 28.0
+    ki_u: 7.0
+    kd_u: 10.0
+    integral_limit_u: 8.0
+
+    kp_r: 25.0
+    ki_r: 3.0
+    kd_r: 6.0
+    integral_limit_r: 6.0
+
+
+/blueboat/controller/body_position_controller:
+  ros__parameters:
+    navigator_topic: /navigator_msg
+    setpoint_topic: /body_position/setpoint
+    body_velocity_controller_name: body_velocity_controller
+
+    # APPROACH
+    kp_position: 0.6
+    kp_yaw: 0.8
+    max_linear_speed: 0.20
+    max_angular_speed: 0.25
+
+    slow_down_radius: 1.2
+    heading_error_stop: 0.70
+
+    # Entrada/salida de hold con histéresis
+    position_hold_radius: 0.30
+    position_release_radius: 0.65
+
+    yaw_tolerance: 0.12
+
+    reverse_distance_threshold: 1.0
+    max_reverse_speed: 0.0
+
+    yaw_command_sign: -1.0
+
+    # HOLD
+    hold_position_deadband: 0.12
+    hold_yaw_deadband: 0.12
+
+    hold_kp_position: 0.25
+    hold_kp_yaw: 0.6
+
+    hold_max_linear_speed: 0.05
+    hold_max_angular_speed: 0.10
+
+/blueboat/controller/navigator_bridge:
+  ros__parameters:
+    linear_lpf_alpha: 0.50
+
+/blueboat/controller/thrusters_system:
+  ros__parameters:
+    thruster_lpf_alpha: 0.20
+
+/blueboat/controller/imu_broadcaster:
+  ros__parameters:
+    sensor_name: imu_sensor
+    frame_id: blueboat/imu_link
+
+/blueboat/controller/magnetometer_broadcaster:
+  ros__parameters:
+    sensor_name: magnetometer_sensor
+    frame_id: blueboat/imu_link
+    topic_name: /blueboat/magnetometer_broadcaster/mag
+    yaw_topic_name: /sura/sensors/gps/yaw_init
+    yaw_offset_rad: 0.0
+
+/blueboat/controller/gps_broadcaster:
+  ros__parameters:
+    sensor_name: gps_sensor
+    frame_id: gps_frame
+    topic_name: /sura/sensors/gps/fix
+    position_covariance: 0.0
+
+/blueboat/controller/battery_broadcaster:
+  ros__parameters:
+    sensor_name: battery_sensor
+    frame_id: blueboat/base_link
+    topic_name: /sura/sensors/battery
+
+/blueboat/controller/altimeter_broadcaster:
+  ros__parameters:
+    sensor_name: altimeter_sensor
+    frame_id: blueboat/altimeter_link
+    topic_name: /blueboat/sensors/altimeter
+    field_of_view: 0.0
+    min_range: 0.02
+    max_range: 50.0
