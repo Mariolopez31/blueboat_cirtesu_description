@@ -62,7 +62,7 @@
 
 /blueboat/controller/body_force_controller:
   ros__parameters:
-    input_topic: /body_force/command
+    input_topic: body_force/command
     base_link: blueboat/base_link
     thruster_joints:
       - blueboat/left_thruster_joint
@@ -70,8 +70,8 @@
 
 /blueboat/controller/body_velocity_controller:
   ros__parameters:
-    cmd_vel_topic: /cmd_vel
-    navigator_topic: /navigator_msg
+    cmd_vel_topic: cmd_vel
+    navigator_topic: /blueboat/navigator/navigation
     body_force_controller_name: body_force_controller
 
     kp_u: 28.0
@@ -87,8 +87,8 @@
 
 /blueboat/controller/body_position_controller:
   ros__parameters:
-    navigator_topic: /navigator_msg
-    setpoint_topic: /body_position/setpoint
+    navigator_topic: /blueboat/navigator/navigation
+    setpoint_topic: body_position/setpoint
     body_velocity_controller_name: body_velocity_controller
 
     # APPROACH
@@ -145,15 +145,16 @@
 /blueboat/controller/gps_broadcaster:
   ros__parameters:
     sensor_name: gps_sensor
-    frame_id: gps_frame
-    topic_name: /sura/sensors/gps/fix
+    frame_id: blueboat/gps_frame
+    topic_name: /blueboat/sensors/gps/fix
     position_covariance: 0.0
 
 /blueboat/controller/battery_broadcaster:
   ros__parameters:
     sensor_name: battery_sensor
     frame_id: blueboat/base_link
-    topic_name: /sura/sensors/battery
+    topic_name: /blueboat/sensors/battery
+    cell_count: 4
 
 /blueboat/controller/altimeter_broadcaster:
   ros__parameters:

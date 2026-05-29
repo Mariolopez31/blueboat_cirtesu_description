@@ -4,7 +4,7 @@
   <xacro:arg name="environment" default="sim"/>
   <xacro:arg name="robot_namespace" default="blueboat"/>
   <xacro:arg name="lookup_csv" default=""/>
-  <xacro:arg name="stonefish_topic" default="/blueboat/catamaran/controller/thruster_setpoints_sim"/>
+  <xacro:arg name="stonefish_topic" default="/blueboat/controller/thruster_setpoints_sim"/>
 
   <xacro:macro name="blueboat_macro" params="prefix">
 
